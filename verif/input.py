@@ -7,6 +7,7 @@ import re
 import time
 import sys
 import netCDF4
+from functools import cached_property
 
 import verif.location
 import verif.util
@@ -186,7 +187,7 @@ class Netcdf(Input):
         else:
             return None
 
-    @property
+    @cached_property
     def ensemble(self):
         if "ensemble" in self._file.variables:
             return verif.util.clean(self._file.variables["ensemble"])
