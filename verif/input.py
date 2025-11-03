@@ -93,8 +93,9 @@ class Input(object):
         if self.pit is not None:
             fields.append(verif.field.Pit())
         if self.ensemble is not None:
+            fields.append(verif.field.Ensemble())
             for member in range(self.num_members):
-                fields.append(verif.field.Ensemble(member))
+                fields.append(verif.field.EnsembleMember(member))
         for name in self.other_fields:
             fields.append(verif.field.Other(name))
         thresholds = [verif.field.Threshold(threshold) for threshold in self.thresholds]
@@ -113,6 +114,7 @@ class Input(object):
         """ Default to setting the name to the filename without the path and extension"""
         I = self.name.rfind('.')
         name = self.name[:I]
+        name = name.replace('_', ' ')
         return name
 
     def get_regular_names(self):
@@ -161,26 +163,35 @@ class Netcdf(Input):
             for required_var in required_vars:
                 valid = valid and required_var in vars
 
+            if "threshold" in dims and "threshold" not in vars:
+                valid = False
+
+            if "quantile" in dims and "quantile" not in vars:
+                valid = False
+
             file.close()
             return valid
+
+        # TODO: Invalid file if we have a threshold dimension, but no threshold probabilities (same
+        # with quantiles)
         except:
             return False
 
-    @property
+    @cached_property
     def obs(self):
         if "obs" in self._file.variables:
             return verif.util.clean(self._file.variables["obs"])
         else:
             return None
 
-    @property
+    @cached_property
     def fcst(self):
         if "fcst" in self._file.variables:
             return verif.util.clean(self._file.variables["fcst"])
         else:
             return None
 
-    @property
+    @cached_property
     def pit(self):
         if "pit" in self._file.variables:
             return verif.util.clean(self._file.variables["pit"])
@@ -194,14 +205,14 @@ class Netcdf(Input):
         else:
             return None
 
-    @property
+    @cached_property
     def threshold_scores(self):
         if "cdf" in self._file.variables:
             return verif.util.clean(self._file.variables["cdf"])
         else:
             return None
 
-    @property
+    @cached_property
     def quantile_scores(self):
         if "x" in self._file.variables:
             return verif.util.clean(self._file.variables["x"])
