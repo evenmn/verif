@@ -475,7 +475,7 @@ class RmseFromEnsembleMean(Metric):
     supports_aggregator = True
     orientation = -1
 
-    def __init__(self, field=verif.field.Other("ens-mean")):
+    def __init__(self, field=verif.field.Other("ensemble_mean")):
         self.field = field
 
     def compute_single(self, data, input_index, axis, axis_index, interval):
@@ -1424,7 +1424,7 @@ class Spread(Metric):
         var0 = verif.field.Quantile(interval.lower)
         var1 = verif.field.Quantile(interval.upper)
         [q0, q1] = data.get_scores([var0, var1], input_index, axis, axis_index)
-        return np.mean(q1 - q0)
+        return np.mean(q1 - q0) / 2
 
     def label(self, variable):
         return self.name
