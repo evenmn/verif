@@ -1564,6 +1564,7 @@ class QQ(Output):
             if len(quantile_scores) > 0:
                 label += " (deterministic)"
             mpl.plot(x, y, label=label, **self._get_plot_options(f))
+            np.savetxt("qq_%d.txt" % f, np.vstack([x, y]).T)
             for i, quantile_score in enumerate(quantile_scores):
                 y = np.sort(quantile_score)
                 label = labels[f] + " (" + "%g" % (self.quantiles[i] * 100) + "%)"
